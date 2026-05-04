@@ -1,3 +1,82 @@
 [
-  {"question": "hihi cả nhà tự tạo testset bằng cơm nhé", "ground_truth": "Không kịp tạo luôn"},
+  {
+    "question": "Nghị định 13/2023/NĐ-CP quy định về vấn đề gì?",
+    "ground_truth": "Nghị định 13/2023/NĐ-CP quy định về bảo vệ dữ liệu cá nhân và trách nhiệm bảo vệ dữ liệu cá nhân của cơ quan, tổ chức, cá nhân có liên quan."
+  },
+  {
+    "question": "Nghị định 13/2023/NĐ-CP áp dụng cho những đối tượng nào?",
+    "ground_truth": "Nghị định áp dụng cho cơ quan, tổ chức, cá nhân Việt Nam; cơ quan, tổ chức, cá nhân nước ngoài tại Việt Nam; cơ quan, tổ chức, cá nhân Việt Nam hoạt động tại nước ngoài; và cơ quan, tổ chức, cá nhân nước ngoài trực tiếp tham gia hoặc có liên quan đến xử lý dữ liệu cá nhân tại Việt Nam."
+  },
+  {
+    "question": "Theo Nghị định 13, dữ liệu cá nhân là gì?",
+    "ground_truth": "Dữ liệu cá nhân là thông tin dưới dạng ký hiệu, chữ viết, chữ số, hình ảnh, âm thanh hoặc dạng tương tự trên môi trường điện tử gắn liền với một con người cụ thể hoặc giúp xác định một con người cụ thể."
+  },
+  {
+    "question": "Dữ liệu cá nhân gồm những nhóm nào?",
+    "ground_truth": "Dữ liệu cá nhân bao gồm dữ liệu cá nhân cơ bản và dữ liệu cá nhân nhạy cảm."
+  },
+  {
+    "question": "Dữ liệu cá nhân cơ bản gồm những thông tin nào?",
+    "ground_truth": "Dữ liệu cá nhân cơ bản gồm các thông tin như họ tên, ngày tháng năm sinh, giới tính, nơi sinh, nơi thường trú, quốc tịch, hình ảnh, số điện thoại, số định danh cá nhân, số hộ chiếu, mã số thuế cá nhân, bảo hiểm xã hội, tình trạng hôn nhân, quan hệ gia đình, tài khoản số và các thông tin khác giúp xác định một con người cụ thể."
+  },
+  {
+    "question": "Dữ liệu cá nhân nhạy cảm theo Nghị định 13 bao gồm những loại nào?",
+    "ground_truth": "Dữ liệu cá nhân nhạy cảm gồm dữ liệu gắn với quyền riêng tư cá nhân như quan điểm chính trị, tôn giáo, tình trạng sức khỏe, nguồn gốc chủng tộc hoặc dân tộc, đặc điểm di truyền, đặc điểm sinh học, đời sống tình dục, dữ liệu tội phạm, thông tin khách hàng của tổ chức tín dụng, dữ liệu vị trí và các dữ liệu cá nhân đặc thù khác cần bảo mật."
+  },
+  {
+    "question": "Chủ thể dữ liệu có những quyền gì theo Điều 9 Nghị định 13?",
+    "ground_truth": "Chủ thể dữ liệu có các quyền như quyền được biết, quyền đồng ý, quyền truy cập, quyền rút lại sự đồng ý, quyền xóa dữ liệu, quyền hạn chế xử lý dữ liệu, quyền cung cấp dữ liệu, quyền phản đối xử lý dữ liệu, quyền khiếu nại, tố cáo, khởi kiện, quyền yêu cầu bồi thường thiệt hại và quyền tự bảo vệ."
+  },
+  {
+    "question": "Quyền đồng ý của chủ thể dữ liệu được hiểu như thế nào?",
+    "ground_truth": "Chủ thể dữ liệu được đồng ý hoặc không đồng ý cho phép xử lý dữ liệu cá nhân của mình, trừ các trường hợp được quy định tại Điều 17 của Nghị định."
+  },
+  {
+    "question": "Sự đồng ý của chủ thể dữ liệu chỉ có hiệu lực khi nào?",
+    "ground_truth": "Sự đồng ý của chủ thể dữ liệu chỉ có hiệu lực khi chủ thể dữ liệu tự nguyện và biết rõ các nội dung như loại dữ liệu cá nhân được xử lý, mục đích xử lý, tổ chức hoặc cá nhân xử lý, quyền và nghĩa vụ của chủ thể dữ liệu."
+  },
+  {
+    "question": "Chủ thể dữ liệu có nghĩa vụ gì theo Nghị định 13?",
+    "ground_truth": "Chủ thể dữ liệu có nghĩa vụ tự bảo vệ dữ liệu cá nhân của mình, yêu cầu các tổ chức, cá nhân liên quan bảo vệ dữ liệu cá nhân, tôn trọng và bảo vệ dữ liệu cá nhân của người khác, cung cấp đầy đủ và chính xác dữ liệu cá nhân khi đồng ý xử lý, và tham gia tuyên truyền kỹ năng bảo vệ dữ liệu cá nhân."
+  },
+  {
+    "question": "Việc thông báo xử lý dữ liệu cá nhân phải được thực hiện khi nào?",
+    "ground_truth": "Việc thông báo xử lý dữ liệu cá nhân được thực hiện một lần trước khi tiến hành hoạt động xử lý dữ liệu cá nhân."
+  },
+  {
+    "question": "Khi nào có thể xử lý dữ liệu cá nhân mà không cần sự đồng ý của chủ thể dữ liệu?",
+    "ground_truth": "Có thể xử lý dữ liệu cá nhân không cần sự đồng ý trong các trường hợp như khẩn cấp để bảo vệ tính mạng, sức khỏe; công khai dữ liệu theo quy định của luật; cơ quan nhà nước xử lý trong tình trạng khẩn cấp về quốc phòng, an ninh, trật tự an toàn xã hội, thảm họa, dịch bệnh; thực hiện nghĩa vụ theo hợp đồng; hoặc phục vụ hoạt động của cơ quan nhà nước theo luật chuyên ngành."
+  },
+  {
+    "question": "Việc xử lý dữ liệu cá nhân của trẻ em cần điều kiện gì?",
+    "ground_truth": "Việc xử lý dữ liệu cá nhân của trẻ em phải bảo vệ quyền và lợi ích tốt nhất của trẻ em; nếu trẻ em từ đủ 7 tuổi trở lên thì cần sự đồng ý của trẻ em và sự đồng ý của cha, mẹ hoặc người giám hộ, trừ trường hợp quy định tại Điều 17."
+  },
+  {
+    "question": "Khi phát hiện vi phạm quy định bảo vệ dữ liệu cá nhân, phải thông báo trong thời hạn bao lâu?",
+    "ground_truth": "Bên Kiểm soát dữ liệu cá nhân hoặc Bên Kiểm soát và xử lý dữ liệu cá nhân phải thông báo cho Bộ Công an chậm nhất 72 giờ sau khi xảy ra hành vi vi phạm; nếu thông báo sau 72 giờ thì phải kèm lý do chậm."
+  },
+  {
+    "question": "Cơ quan chuyên trách bảo vệ dữ liệu cá nhân là cơ quan nào?",
+    "ground_truth": "Cơ quan chuyên trách bảo vệ dữ liệu cá nhân là Cục An ninh mạng và phòng, chống tội phạm sử dụng công nghệ cao thuộc Bộ Công an."
+  },
+  {
+    "question": "Công ty trong tờ khai thuế GTGT là công ty nào?",
+    "ground_truth": "Tên người nộp thuế trong tờ khai là CÔNG TY CỔ PHẦN DHA SURFACES."
+  },
+  {
+    "question": "Mã số thuế của Công ty Cổ phần DHA Surfaces là bao nhiêu?",
+    "ground_truth": "Mã số thuế của Công ty Cổ phần DHA Surfaces là 0106769437."
+  },
+  {
+    "question": "Kỳ tính thuế trong tờ khai thuế GTGT của DHA Surfaces là kỳ nào?",
+    "ground_truth": "Kỳ tính thuế trong tờ khai là Quý 4 năm 2024."
+  },
+  {
+    "question": "Thuế giá trị gia tăng còn được khấu trừ kỳ trước chuyển sang của DHA Surfaces là bao nhiêu?",
+    "ground_truth": "Thuế giá trị gia tăng còn được khấu trừ kỳ trước chuyển sang là 77.377.803 đồng."
+  },
+  {
+    "question": "Thuế giá trị gia tăng còn phải nộp trong kỳ của DHA Surfaces là bao nhiêu?",
+    "ground_truth": "Thuế giá trị gia tăng còn phải nộp trong kỳ của DHA Surfaces là 52.133.830 đồng."
+  }
 ]
