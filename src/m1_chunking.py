@@ -8,8 +8,9 @@ Test: pytest tests/test_m1.py
 """
 
 import os, sys, glob, re
+from collections import Counter
 from dataclasses import dataclass, field
-from typing import Optional, List, Tuple, Dict
+from math import sqrt
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import (DATA_DIR, HIERARCHICAL_PARENT_SIZE, HIERARCHICAL_CHILD_SIZE,
@@ -20,10 +21,10 @@ from config import (DATA_DIR, HIERARCHICAL_PARENT_SIZE, HIERARCHICAL_CHILD_SIZE,
 class Chunk:
     text: str
     metadata: dict = field(default_factory=dict)
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
 
 
-def load_documents(data_dir: str = DATA_DIR) -> List[Dict]:
+def load_documents(data_dir: str = DATA_DIR) -> list[dict]:
     """Load all markdown/text files from data/. (Đã implement sẵn)"""
     docs = []
     for fp in sorted(glob.glob(os.path.join(data_dir, "*.md"))):
@@ -35,7 +36,7 @@ def load_documents(data_dir: str = DATA_DIR) -> List[Dict]:
 # ─── Baseline: Basic Chunking (để so sánh) ──────────────
 
 
-def chunk_basic(text: str, chunk_size: int = 500, metadata: Optional[dict] = None) -> List[Chunk]:
+def chunk_basic(text: str, chunk_size: int = 500, metadata: dict | None = None) -> list[Chunk]:
     """
     Basic chunking: split theo paragraph (\\n\\n).
     Đây là baseline — KHÔNG phải mục tiêu của module này.
@@ -59,7 +60,7 @@ def chunk_basic(text: str, chunk_size: int = 500, metadata: Optional[dict] = Non
 
 
 def chunk_semantic(text: str, threshold: float = SEMANTIC_THRESHOLD,
-                   metadata: Optional[dict] = None) -> List[Chunk]:
+                   metadata: dict | None = None) -> list[Chunk]:
     """
     Split text by sentence similarity — nhóm câu cùng chủ đề.
     Tốt hơn basic vì không cắt giữa ý.
@@ -73,48 +74,47 @@ def chunk_semantic(text: str, threshold: float = SEMANTIC_THRESHOLD,
         List of Chunk objects grouped by semantic similarity.
     """
     metadata = metadata or {}
-
-    # Split text into sentences
     sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+|\n\n', text) if s.strip()]
     if not sentences:
         return []
 
-    # Encode sentences
-    from sentence_transformers import SentenceTransformer
-    import numpy as np
+    def lexical_vector(sentence: str) -> Counter:
+        return Counter(re.findall(r"\w+", sentence.lower(), flags=re.UNICODE))
 
-    model = SentenceTransformer("all-MiniLM-L6-v2")
-    embeddings = model.encode(sentences)
+    def lexical_cosine(a: Counter, b: Counter) -> float:
+        if not a or not b:
+            return 0.0
+        dot = sum(a[token] * b[token] for token in set(a) & set(b))
+        norm_a = sqrt(sum(v * v for v in a.values()))
+        norm_b = sqrt(sum(v * v for v in b.values()))
+        return dot / (norm_a * norm_b) if norm_a and norm_b else 0.0
 
-    # Group sentences by similarity
+    similarities = []
+    if os.getenv("USE_ST_EMBEDDINGS") == "1":
+        from sentence_transformers import SentenceTransformer
+        from numpy import dot
+        from numpy.linalg import norm
+
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings = model.encode(sentences, show_progress_bar=False)
+        for i in range(1, len(sentences)):
+            denom = norm(embeddings[i-1]) * norm(embeddings[i])
+            similarities.append(float(dot(embeddings[i-1], embeddings[i]) / denom) if denom else 0.0)
+    else:
+        vectors = [lexical_vector(sentence) for sentence in sentences]
+        similarities = [lexical_cosine(vectors[i-1], vectors[i]) for i in range(1, len(vectors))]
+        
     chunks = []
     current_group = [sentences[0]]
-
-    for i in range(1, len(sentences)):
-        # Cosine similarity between consecutive sentences
-        sim = np.dot(embeddings[i-1], embeddings[i]) / (
-            np.linalg.norm(embeddings[i-1]) * np.linalg.norm(embeddings[i])
-        )
-
+    for sentence, sim in zip(sentences[1:], similarities):
         if sim < threshold:
-            # Create new chunk
-            chunk_text = " ".join(current_group)
-            chunks.append(Chunk(
-                text=chunk_text,
-                metadata={**metadata, "chunk_index": len(chunks), "strategy": "semantic"}
-            ))
+            chunks.append(Chunk(text=" ".join(current_group), metadata={**metadata, "chunk_index": len(chunks), "strategy": "semantic"}))
             current_group = []
-
-        current_group.append(sentences[i])
-
-    # Add last group
+        current_group.append(sentence)
+        
     if current_group:
-        chunk_text = " ".join(current_group)
-        chunks.append(Chunk(
-            text=chunk_text,
-            metadata={**metadata, "chunk_index": len(chunks), "strategy": "semantic"}
-        ))
-
+        chunks.append(Chunk(text=" ".join(current_group), metadata={**metadata, "chunk_index": len(chunks), "strategy": "semantic"}))
+        
     return chunks
 
 
@@ -123,7 +123,7 @@ def chunk_semantic(text: str, threshold: float = SEMANTIC_THRESHOLD,
 
 def chunk_hierarchical(text: str, parent_size: int = HIERARCHICAL_PARENT_SIZE,
                        child_size: int = HIERARCHICAL_CHILD_SIZE,
-                       metadata: Optional[dict] = None) -> Tuple[List[Chunk], List[Chunk]]:
+                       metadata: dict | None = None) -> tuple[list[Chunk], list[Chunk]]:
     """
     Parent-child hierarchy: retrieve child (precision) → return parent (context).
     Đây là default recommendation cho production RAG.
@@ -138,65 +138,41 @@ def chunk_hierarchical(text: str, parent_size: int = HIERARCHICAL_PARENT_SIZE,
         (parents, children) — mỗi child có parent_id link đến parent.
     """
     metadata = metadata or {}
-    parents = []
-    children = []
-
-    # Split text into paragraphs
-    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
-
-    # Create parent chunks
-    current_parent = ""
+    parents_list = []
+    children_list = []
+    
+    paragraphs = text.split("\n\n")
+    current_parent_text = ""
     p_index = 0
-
+    
     for para in paragraphs:
-        if len(current_parent) + len(para) > parent_size and current_parent:
+        if len(current_parent_text) + len(para) > parent_size and current_parent_text:
             pid = f"parent_{p_index}"
-            parents.append(Chunk(
-                text=current_parent.strip(),
-                metadata={**metadata, "chunk_type": "parent", "parent_id": pid}
-            ))
-
-            # Split parent into children
-            parent_text = current_parent.strip()
-            for i in range(0, len(parent_text), child_size):
-                child_text = parent_text[i:i + child_size]
-                if child_text.strip():
-                    children.append(Chunk(
-                        text=child_text.strip(),
-                        metadata={**metadata, "chunk_type": "child"},
-                        parent_id=pid
-                    ))
-
-            current_parent = ""
+            parents_list.append(Chunk(text=current_parent_text.strip(), metadata={**metadata, "chunk_type": "parent", "parent_id": pid}))
             p_index += 1
-
-        current_parent += para + "\n\n"
-
-    # Handle last parent
-    if current_parent.strip():
+            current_parent_text = ""
+        current_parent_text += para + "\n\n"
+        
+    if current_parent_text.strip():
         pid = f"parent_{p_index}"
-        parents.append(Chunk(
-            text=current_parent.strip(),
-            metadata={**metadata, "chunk_type": "parent", "parent_id": pid}
-        ))
-
-        parent_text = current_parent.strip()
-        for i in range(0, len(parent_text), child_size):
-            child_text = parent_text[i:i + child_size]
-            if child_text.strip():
-                children.append(Chunk(
-                    text=child_text.strip(),
-                    metadata={**metadata, "chunk_type": "child"},
-                    parent_id=pid
-                ))
-
-    return parents, children
+        parents_list.append(Chunk(text=current_parent_text.strip(), metadata={**metadata, "chunk_type": "parent", "parent_id": pid}))
+        
+    for parent in parents_list:
+        pid = parent.metadata["parent_id"]
+        parent_text = parent.text
+        start = 0
+        while start < len(parent_text):
+            child_text = parent_text[start:start + child_size]
+            children_list.append(Chunk(text=child_text, metadata={**metadata, "chunk_type": "child"}, parent_id=pid))
+            start += child_size
+            
+    return parents_list, children_list
 
 
 # ─── Strategy 3: Structure-Aware Chunking ────────────────
 
 
-def chunk_structure_aware(text: str, metadata: Optional[dict] = None) -> List[Chunk]:
+def chunk_structure_aware(text: str, metadata: dict | None = None) -> list[Chunk]:
     """
     Parse markdown headers → chunk theo logical structure.
     Giữ nguyên tables, code blocks, lists — không cắt giữa chừng.
@@ -209,75 +185,60 @@ def chunk_structure_aware(text: str, metadata: Optional[dict] = None) -> List[Ch
         List of Chunk objects, mỗi chunk = 1 section (header + content).
     """
     metadata = metadata or {}
-
-    # Split by markdown headers (h1-h3)
     sections = re.split(r'(^#{1,3}\s+.+$)', text, flags=re.MULTILINE)
-
+    
     chunks = []
     current_header = ""
     current_content = ""
-
+    
     for part in sections:
         if re.match(r'^#{1,3}\s+', part):
-            # Save previous section
-            if current_content.strip():
-                chunk_text = f"{current_header}\n{current_content}".strip() if current_header else current_content.strip()
-                level = len(re.match(r'^(#+)', current_header).group(1)) if current_header else 0
+            if current_content.strip() or current_header:
                 chunks.append(Chunk(
-                    text=chunk_text,
-                    metadata={**metadata, "section": current_header.strip('#').strip(), "level": level, "strategy": "structure"}
+                    text=f"{current_header}\n{current_content}".strip(),
+                    metadata={**metadata, "section": current_header, "strategy": "structure"}
                 ))
-
             current_header = part.strip()
             current_content = ""
         else:
             current_content += part
-
-    # Add last section
-    if current_header or current_content.strip():
-        chunk_text = f"{current_header}\n{current_content}".strip() if current_header else current_content.strip()
-        level = len(re.match(r'^(#+)', current_header).group(1)) if current_header else 0
+            
+    if current_content.strip() or current_header:
         chunks.append(Chunk(
-            text=chunk_text,
-            metadata={**metadata, "section": current_header.strip('#').strip() if current_header else "", "level": level, "strategy": "structure"}
+            text=f"{current_header}\n{current_content}".strip(),
+            metadata={**metadata, "section": current_header, "strategy": "structure"}
         ))
-
-    return chunks
+        
+    return [c for c in chunks if c.text.strip()]
 
 
 # ─── A/B Test: Compare All Strategies ────────────────────
 
 
-def compare_strategies(documents: List[dict]) -> dict:
+def compare_strategies(documents: list[dict]) -> dict:
     """
     Run all strategies on documents and compare.
 
     Returns:
         {"basic": {...}, "semantic": {...}, "hierarchical": {...}, "structure": {...}}
     """
-    results = {}
-
-    # Collect all chunks from all documents for each strategy
     all_basic = []
     all_semantic = []
-    all_hierarchical_parents = []
-    all_hierarchical_children = []
+    all_parents = []
+    all_children = []
     all_structure = []
 
     for doc in documents:
-        text = doc["text"]
-        meta = doc.get("metadata", {})
+        text = doc.get("text", "")
+        metadata = doc.get("metadata", {})
+        all_basic.extend(chunk_basic(text, metadata=metadata))
+        all_semantic.extend(chunk_semantic(text, metadata=metadata))
+        parents, children = chunk_hierarchical(text, metadata=metadata)
+        all_parents.extend(parents)
+        all_children.extend(children)
+        all_structure.extend(chunk_structure_aware(text, metadata=metadata))
 
-        # Run each strategy
-        all_basic.extend(chunk_basic(text, metadata=meta))
-        all_semantic.extend(chunk_semantic(text, metadata=meta))
-        parents, children = chunk_hierarchical(text, metadata=meta)
-        all_hierarchical_parents.extend(parents)
-        all_hierarchical_children.extend(children)
-        all_structure.extend(chunk_structure_aware(text, metadata=meta))
-
-    # Calculate stats for each strategy
-    def calc_stats(chunks):
+    def stats(chunks: list[Chunk]) -> dict:
         if not chunks:
             return {"num_chunks": 0, "avg_length": 0, "min_length": 0, "max_length": 0}
         lengths = [len(c.text) for c in chunks]
@@ -285,19 +246,19 @@ def compare_strategies(documents: List[dict]) -> dict:
             "num_chunks": len(chunks),
             "avg_length": int(sum(lengths) / len(lengths)),
             "min_length": min(lengths),
-            "max_length": max(lengths)
+            "max_length": max(lengths),
         }
 
-    results["basic"] = calc_stats(all_basic)
-    results["semantic"] = calc_stats(all_semantic)
-    results["hierarchical"] = {
-        "num_parents": len(all_hierarchical_parents),
-        "num_children": len(all_hierarchical_children),
-        **calc_stats(all_hierarchical_children)
+    return {
+        "basic": stats(all_basic),
+        "semantic": stats(all_semantic),
+        "hierarchical": {
+            **stats(all_children),
+            "num_parents": len(all_parents),
+            "num_children": len(all_children),
+        },
+        "structure": stats(all_structure),
     }
-    results["structure"] = calc_stats(all_structure)
-
-    return results
 
 
 if __name__ == "__main__":
