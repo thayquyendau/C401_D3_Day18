@@ -11,7 +11,7 @@
 | 2A202600144_Nguyễn Doãn Hiếu | M2: Hybrid Search | ☑ | 5/5 |
 | 2A202600359_Đậu Văn Quyền | M3: Reranking | ☑ | 5/5 |
 | Thành viên 4 | M4: Evaluation | ☑ | 4/4 |
-| Thành viên 4 | M5: Enrichment | ☑ | 10/10 |
+| 2A202600358_Đào Danh Đăng Phụng | M5: Enrichment | ☑ | 10/10 |
 
 ## Kết quả RAGAS
 
