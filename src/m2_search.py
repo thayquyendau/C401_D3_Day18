@@ -74,8 +74,9 @@ class DenseSearch:
 
     def _get_encoder(self):
         if self._encoder is None:
+            import torch
             from sentence_transformers import SentenceTransformer
-            self._encoder = SentenceTransformer(EMBEDDING_MODEL)
+            self._encoder = SentenceTransformer(EMBEDDING_MODEL, model_kwargs={"torch_dtype": torch.float16})
         return self._encoder
 
     def index(self, chunks: list[dict], collection: str = COLLECTION_NAME) -> None:
@@ -90,7 +91,7 @@ class DenseSearch:
             vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
         )
         # Encode and upsert in batches to avoid OOM on low-RAM machines
-        BATCH = 16
+        BATCH = 4
         encoder = self._get_encoder()
         idx = 0
         for start in range(0, len(chunks), BATCH):
