@@ -1,0 +1,81 @@
+{
+  "aggregate": {
+    "faithfulness": 0.9444444444444444,
+    "answer_relevancy": 0.8474612149783877,
+    "context_precision": 0.8239980158446553,
+    "context_recall": 0.9108333333333333
+  },
+  "num_questions": 20,
+  "failures": [
+    {
+      "question": "Cơ quan chuyên trách bảo vệ dữ liệu cá nhân là cơ quan nào?",
+      "worst_metric": "faithfulness",
+      "score": 0.5,
+      "diagnosis": "LLM hallucinating",
+      "suggested_fix": "Tighten prompt, lower temperature"
+    },
+    {
+      "question": "Chủ thể dữ liệu có nghĩa vụ gì theo Nghị định 13?",
+      "worst_metric": "context_recall",
+      "score": 0.4,
+      "diagnosis": "Missing relevant chunks",
+      "suggested_fix": "Improve chunking or add BM25"
+    },
+    {
+      "question": "Kỳ tính thuế trong tờ khai thuế GTGT của DHA Surfaces là kỳ nào?",
+      "worst_metric": "context_precision",
+      "score": 0.3333333333,
+      "diagnosis": "Too many irrelevant chunks",
+      "suggested_fix": "Add reranking or metadata filter"
+    },
+    {
+      "question": "Nghị định 13/2023/NĐ-CP áp dụng cho những đối tượng nào?",
+      "worst_metric": "faithfulness",
+      "score": 0.6666666666666666,
+      "diagnosis": "LLM hallucinating",
+      "suggested_fix": "Tighten prompt, lower temperature"
+    },
+    {
+      "question": "Công ty trong tờ khai thuế GTGT là công ty nào?",
+      "worst_metric": "context_precision",
+      "score": 0.49999999995,
+      "diagnosis": "Too many irrelevant chunks",
+      "suggested_fix": "Add reranking or metadata filter"
+    },
+    {
+      "question": "Dữ liệu cá nhân gồm những nhóm nào?",
+      "worst_metric": "context_precision",
+      "score": 0.49999999995,
+      "diagnosis": "Too many irrelevant chunks",
+      "suggested_fix": "Add reranking or metadata filter"
+    },
+    {
+      "question": "Khi nào có thể xử lý dữ liệu cá nhân mà không cần sự đồng ý của chủ thể dữ liệu?",
+      "worst_metric": "context_recall",
+      "score": 0.4,
+      "diagnosis": "Missing relevant chunks",
+      "suggested_fix": "Improve chunking or add BM25"
+    },
+    {
+      "question": "Dữ liệu cá nhân cơ bản gồm những thông tin nào?",
+      "worst_metric": "context_precision",
+      "score": 0.6791666666496875,
+      "diagnosis": "Too many irrelevant chunks",
+      "suggested_fix": "Add reranking or metadata filter"
+    },
+    {
+      "question": "Việc xử lý dữ liệu cá nhân của trẻ em cần điều kiện gì?",
+      "worst_metric": "context_recall",
+      "score": 0.6666666666666666,
+      "diagnosis": "Missing relevant chunks",
+      "suggested_fix": "Improve chunking or add BM25"
+    },
+    {
+      "question": "Dữ liệu cá nhân nhạy cảm theo Nghị định 13 bao gồm những loại nào?",
+      "worst_metric": "answer_relevancy",
+      "score": 0.8088200580565923,
+      "diagnosis": "Unknown error",
+      "suggested_fix": "Check pipeline"
+    }
+  ]
+}
