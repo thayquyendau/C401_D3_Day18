@@ -1,7 +1,7 @@
 # Failure Analysis — Lab 18: Production RAG
 
 **Nhóm:** Nhóm D3  
-**Thành viên:** [Tên 1 → M1] · [2A202600144_Nguyễn Doãn Hiếu → M2] · [Tên 3 → M3] · [Tên 4 → M4]
+**Thành viên:** [Tên 1 → M1] · [2A202600144_Nguyễn Doãn Hiếu → M2] · [2A202600359_Đậu Văn Quyền → M3] · [Tên 4 → M4]
 
 ---
 
