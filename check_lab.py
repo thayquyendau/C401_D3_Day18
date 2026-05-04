@@ -7,8 +7,12 @@ Chạy: python check_lab.py
 
 import json
 import os
+import re
 import sys
 import subprocess
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 
 def check_file(path: str, required: bool = True) -> bool:
@@ -58,17 +62,17 @@ def run_tests() -> tuple[int, int]:
             [sys.executable, "-m", "pytest", "tests/", "-v", "--tb=no", "-q"],
             capture_output=True, text=True, timeout=120,
         )
-        lines = result.stdout.strip().split("\n")
-        summary = lines[-1] if lines else ""
-        # Parse "X passed, Y failed" or "X passed"
+        output = f"{result.stdout}\n{result.stderr}"
+        # Parse pytest summaries even when warnings/deprecation lines appear
+        # after the normal "X passed" summary.
         passed = total = 0
-        for part in summary.split(","):
-            part = part.strip()
-            if "passed" in part:
-                passed = int(part.split()[0])
-                total += passed
-            if "failed" in part:
-                total += int(part.split()[0])
+        for status in ["passed", "failed", "error", "errors", "skipped"]:
+            matches = re.findall(rf"(\d+)\s+{status}\b", output)
+            count = int(matches[-1]) if matches else 0
+            if status == "passed":
+                passed = count
+            if status in {"passed", "failed", "error", "errors"}:
+                total += count
         return passed, total
     except Exception as e:
         print(f"  ⚠️  pytest error: {e}")
