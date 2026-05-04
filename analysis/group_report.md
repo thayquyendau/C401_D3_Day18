@@ -7,7 +7,7 @@
 
 | Tên | Module | Hoàn thành | Tests pass |
 |-----|--------|-----------|-----------|
-| Thành viên 1 | M1: Chunking | ☑ | 8/8 |
+| 2A202600411_Nguyễn Văn Đạt | M1: Chunking | ☑ | 8/8 |
 | 2A202600144_Nguyễn Doãn Hiếu | M2: Hybrid Search | ☑ | 5/5 |
 | 2A202600359_Đậu Văn Quyền | M3: Reranking | ☑ | 5/5 |
 | Thành viên 4 | M4: Evaluation | ☑ | 4/4 |

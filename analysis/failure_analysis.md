@@ -1,7 +1,7 @@
 # Failure Analysis — Lab 18: Production RAG
 
 **Nhóm:** Nhóm D3  
-**Thành viên:** [Tên 1 → M1] · [2A202600144_Nguyễn Doãn Hiếu → M2] · [2A202600359_Đậu Văn Quyền → M3] · [Tên 4 → M4]
+**Thành viên:** [2A202600411_Nguyễn Văn Đạt → M1] · [2A202600144_Nguyễn Doãn Hiếu → M2] · [2A202600359_Đậu Văn Quyền → M3] · [Tên 4 → M4]
 
 ---
 
@@ -17,6 +17,7 @@
 ## Bottom-5 Failures
 
 ### #1
+
 - **Question:** Cơ quan chuyên trách bảo vệ dữ liệu cá nhân là cơ quan nào?
 - **Expected:** Cục An ninh mạng và phòng, chống tội phạm sử dụng công nghệ cao.
 - **Got:** (Câu trả lời bị sai lệch hoặc không có căn cứ từ context)
@@ -26,6 +27,7 @@
 - **Suggested fix:** Tighten prompt (bắt buộc chỉ dùng context), lower temperature.
 
 ### #2
+
 - **Question:** Chủ thể dữ liệu có nghĩa vụ gì theo Nghị định 13?
 - **Expected:** Liệt kê đầy đủ các nghĩa vụ theo Nghị định.
 - **Got:** Trả lời thiếu một số nghĩa vụ.
@@ -35,6 +37,7 @@
 - **Suggested fix:** Improve chunking (tăng chunk size) hoặc tăng top_k.
 
 ### #3
+
 - **Question:** Kỳ tính thuế trong tờ khai thuế GTGT của DHA Surfaces là kỳ nào?
 - **Expected:** Câu trả lời tương ứng với thông tin trong tờ khai.
 - **Got:** Trả về kèm nhiều thông tin nhiễu từ các văn bản khác.
@@ -44,6 +47,7 @@
 - **Suggested fix:** Add metadata filter (chỉ tìm trong file tờ khai).
 
 ### #4
+
 - **Question:** Nghị định 13/2023/NĐ-CP áp dụng cho những đối tượng nào?
 - **Expected:** Cơ quan, tổ chức, cá nhân có liên quan.
 - **Got:** Bịa thêm đối tượng không thuộc luật định.
@@ -53,6 +57,7 @@
 - **Suggested fix:** Tighten prompt, lower temperature = 0.
 
 ### #5
+
 - **Question:** Khi nào có thể xử lý dữ liệu cá nhân mà không cần sự đồng ý của chủ thể dữ liệu?
 - **Expected:** Khẩn cấp, bảo vệ tính mạng, v.v.
 - **Got:** Liệt kê thiếu.
@@ -66,10 +71,12 @@
 **Question chọn phân tích:** Kỳ tính thuế trong tờ khai thuế GTGT của DHA Surfaces là kỳ nào?
 
 **Error Tree walkthrough:**
+
 1. Output đúng? → Có thể đúng nhưng context kèm theo rác.
 2. Context đúng? → Không, có quá nhiều irrelevant chunks làm loãng context.
 3. Query rewrite OK? → Query rõ ràng nhưng thiếu cơ chế lọc tài liệu.
 4. Fix ở bước: Thêm Pre-RAG để lọc theo metadata `source` hoặc `document_type`.
 
 **Nếu có thêm 1 giờ, sẽ optimize:**
+
 - Tích hợp Self-Query Retrieval để tự động nhận diện ý định "Tờ khai thuế" và add metadata filter vào lệnh search Qdrant.
